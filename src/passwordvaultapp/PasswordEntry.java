@@ -65,7 +65,7 @@ public class PasswordEntry {
         return encryptionService.decrypt(this.encryptedPassword, key);
     }
 
-    public void encryptdPassword(EncryptionService encryptionService, String plainPassword, byte[] key) {
+    public void encryptedPassword(EncryptionService encryptionService, String plainPassword, byte[] key) {
         this.encryptedPassword = encryptionService.encrypt(plainPassword, key);
     }
     
