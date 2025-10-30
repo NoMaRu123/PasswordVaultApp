@@ -99,4 +99,63 @@ public class DatabaseManager {
         }
         return null;
     }
+    
+    // Save a password Entry
+    public boolean savePassword(PasswordEntry entry) {
+        String sql = "INSERT INTO PasswordEntries (userID, serviceName, username, encryptedPassword, creationDate) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, entry.getUserID());
+            pstmt.setString(2, entry.getServiceName());
+            pstmt.setString(3, entry.getUsername());
+            pstmt.setBytes(4, entry.getEncryptedPassword());
+            pstmt.setString(5, entry.getCreationDate().toString());
+            pstmt.executeUpdate();
+            System.out.println("Password entry has been saved for service: " + entry.getServiceName());
+            return true;
+        }catch(SQLException e){
+            System.err.println("Error saving password: " + e.getMessage());
+            return false;
+        }
+    }
+        
+        
+    //Fetch all password Entries for a given userID
+    public List<PasswordEntry> getPasswordByUserID(int userID) {
+        List<PasswordEntry> entries = new ArrayList<>();
+        
+        String sql = "SELECT * FROM PasswordEntries WHERE userID = ?";
+        try(PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setInt(1, userID);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                int entryID = rs.getInt("entryID");
+                String serviceName = rs.getString("serviceName");
+                String username = rs.getString("serviceName");
+                byte[] encryptedPassword = rs.getBytes("encryptedPassword");
+                String dataStr = rs.getString("creationDate");
+                
+                PasswordEntry entry = new PasswordEntry(entryID, userID, serviceName, username, encryptedPassword, Date.valueOf(dataStr));
+                entries.add(entry);
+            }
+            
+        }catch(SQLException e){
+            System.err.println("Error fetching password: " + e.getMessage());
+        }
+        
+        return entries;
+    }
+    
+    // Close connection
+    public void close() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("");
+            }
+        } catch (SQLException e){
+            System.err.println("Error closing database: " + e.getMessage());
+        }
+    }
+    
 }
